@@ -1,5 +1,7 @@
 # AI Test Triage Accelerator
 
+[Source repository](https://github.com/Akashpatil9657/ai-test-triage-accelerator)
+
 ## Problem statement
 
 Release engineers and QA analysts often receive a long pytest/JUnit failure report after a change. The same underlying defect can appear in many tests, while the most urgent regression may be buried among noisy, repeated stack traces. Before this tool, a human copied failures into a spreadsheet or chat, manually removed changing values such as IDs and line numbers, counted duplicates, and guessed which changed file was most likely responsible. That work delayed triage and made handoff inconsistent, especially when several teams owned adjacent services.
