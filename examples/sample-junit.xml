@@ -1,0 +1,17 @@
+<testsuite name="payments" tests="5" failures="4">
+  <testcase classname="tests.test_payments.TestPayment" name="test_card_declined" time="0.11">
+    <failure message="AssertionError: expected 200, got 500">E AssertionError: expected 200, got 500
+E assert 500 == 200</failure>
+  </testcase>
+  <testcase classname="tests.test_payments.TestPayment" name="test_card_declined_retry" time="0.10">
+    <failure message="AssertionError: expected 200, got 500">E AssertionError: expected 500 == 200</failure>
+  </testcase>
+  <testcase classname="tests.test_payments.TestPayment" name="test_refund" time="0.08">
+    <failure message="TimeoutError: gateway request exceeded 30 seconds">E TimeoutError: gateway request exceeded 30 seconds</failure>
+  </testcase>
+  <testcase classname="tests.test_orders.TestOrder" name="test_payment_receipt" time="0.05">
+    <failure message="AssertionError: expected receipt">E AssertionError: expected receipt
+E assert None</failure>
+  </testcase>
+  <testcase classname="tests.test_payments.TestPayment" name="test_success" time="0.03" />
+</testsuite>
