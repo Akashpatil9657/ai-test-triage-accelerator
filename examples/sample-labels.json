@@ -1,0 +1,6 @@
+{
+  "tests.test_payments.TestPayment::test_card_declined": "gateway-status-regression",
+  "tests.test_payments.TestPayment::test_card_declined_retry": "gateway-status-regression",
+  "tests.test_payments.TestPayment::test_refund": "gateway-timeout",
+  "tests.test_orders.TestOrder::test_payment_receipt": "receipt-not-created"
+}

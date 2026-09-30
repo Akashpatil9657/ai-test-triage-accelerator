@@ -1,10 +1,14 @@
 <testsuite name="payments" tests="5" failures="4">
   <testcase classname="tests.test_payments.TestPayment" name="test_card_declined" time="0.11">
     <failure message="AssertionError: expected 200, got 500">E AssertionError: expected 200, got 500
+  E File "src/payments.py", line 42, in charge_card
+  E File "tests/test_payments.py", line 18, in test_card_declined
 E assert 500 == 200</failure>
   </testcase>
   <testcase classname="tests.test_payments.TestPayment" name="test_card_declined_retry" time="0.10">
-    <failure message="AssertionError: expected 200, got 500">E AssertionError: expected 500 == 200</failure>
+    <failure message="AssertionError: expected 200, got 500">E AssertionError: expected 500 == 200
+  E File "src/payments.py", line 42, in charge_card
+  E File "tests/test_payments.py", line 29, in test_card_declined_retry</failure>
   </testcase>
   <testcase classname="tests.test_payments.TestPayment" name="test_refund" time="0.08">
     <failure message="TimeoutError: gateway request exceeded 30 seconds">E TimeoutError: gateway request exceeded 30 seconds</failure>

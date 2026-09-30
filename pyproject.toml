@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Offline pytest failure clustering and triage brief generator"
 requires-python = ">=3.10"
 
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
 [project.scripts]
 ai-test-triage = "triage_accelerator.cli:main"
 

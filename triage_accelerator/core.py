@@ -22,9 +22,8 @@ class Failure:
         text = self.message
         if not text or text.lower() == "failure":
             text = self.details
-        text = text.lower()
-        text = re.sub(r"0x[0-9a-f]+|\b\d+(?:\.\d+)?\b", "<n>", text)
-        text = re.sub(r"[A-Z]:\\[^\s]+|/[^\s]+", "<path>", text)
+        text = re.sub(r"(?i)\b[A-Z]:\\[^\s]+|/[^\s]+", "<path>", text)
+        text = re.sub(r"0x[0-9a-f]+|\b\d+(?:\.\d+)?\b", "<n>", text.lower())
         text = re.sub(r"\s+", " ", text).strip()
         return text[:180]
 
@@ -57,7 +56,10 @@ class Cluster:
 
 
 def parse_junit(path: Path) -> list[Failure]:
-    root = ET.parse(path).getroot()
+    try:
+        root = ET.parse(path).getroot()
+    except (OSError, ET.ParseError) as exc:
+        raise ValueError(f"could not read valid JUnit XML '{path}': {exc}") from exc
     failures: list[Failure] = []
     for case in root.iter("testcase"):
         node = case.find("failure")
@@ -65,13 +67,20 @@ def parse_junit(path: Path) -> list[Failure]:
             node = case.find("error")
         if node is None:
             continue
+        try:
+            duration = float(case.attrib.get("time", "0") or 0)
+        except ValueError as exc:
+            raise ValueError(
+                f"invalid test duration in JUnit XML '{path}' for "
+                f"{case.attrib.get('name', 'unknown')}"
+            ) from exc
         failures.append(
             Failure(
                 test_name=case.attrib.get("name", "unknown"),
                 classname=case.attrib.get("classname", "unknown"),
                 message=node.attrib.get("message", "failure"),
                 details=(node.text or "").strip(),
-                duration=float(case.attrib.get("time", "0") or 0),
+                duration=duration,
             )
         )
     return failures
@@ -89,9 +98,11 @@ def parse_changed_files(diff: str) -> list[str]:
 
 def attach_ownership(failures: list[Failure], changed_files: list[str]) -> None:
     for failure in failures:
-        haystack = f"{failure.classname} {failure.test_name} {failure.details}".lower()
+        trace = re.sub(r"[\\]+", "/", failure.details).lower()
         failure.changed_files.extend(
-            path for path in changed_files if Path(path).stem.lower() in haystack
+            path
+            for path in changed_files
+            if path.replace("\\", "/").lower().lstrip("./") in trace
         )
 
 
@@ -103,7 +114,11 @@ def cluster_failures(failures: list[Failure]) -> list[Cluster]:
     return sorted(clusters, key=lambda cluster: (-cluster.count, cluster.signature))
 
 
-def render_markdown(clusters: list[Cluster], changed_files: list[str]) -> str:
+def render_markdown(
+    clusters: list[Cluster],
+    changed_files: list[str],
+    explanations: list[str] | None = None,
+) -> str:
     total = sum(cluster.count for cluster in clusters)
     lines = [
         "# AI Test Triage Brief",
@@ -135,6 +150,9 @@ def render_markdown(clusters: list[Cluster], changed_files: list[str]) -> str:
                 "",
             ]
         )
+        if explanations and index <= len(explanations):
+            lines.append(f"> **Unverified local-model hypothesis:** {explanations[index - 1]}")
+            lines.append("")
     lines.extend(
         [
             "## Human Review Required",
